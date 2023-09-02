@@ -365,7 +365,8 @@ const updateDoctorInfo = async (req, res, next) => {
     return res.status(200).json({
       status: 'success',
       message: 'DoctorInfo and User updated successfully.',
-      data: { doctorInfo: updatedDoctorInfo, user: updatedUser },
+      data: { doctorUpdateData,  userUpdateData },
+     // data: { doctorInfo: updatedDoctorInfo, user: updatedUser }, // to return all the data in the doctor and user model
     });
   } catch (error) {
     console.log(error);

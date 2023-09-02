@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const doctorController = require("../controllers/doctorController");
+const {viewAllDoctors} = require("../controllers/doctorController");
+
 const { verifyToken, verifyDoctor } = require("../middleware/authMiddleware");
 
 router.get("/", verifyToken, verifyDoctor, (req, res) => {

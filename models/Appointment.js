@@ -15,8 +15,18 @@ const ScheduleSchema = new mongoose.Schema(
             enum: ['Scheduled', 'Booked', 'Completed', 'Cancelled'],
             default: 'Scheduled',
         },
-    },
-);
+        
+        patient: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          //     //     //required: true,
+          },
+          
+            bookingId: {
+               type: String,
+           },
+              },
+          );
 
 const AppointmentSchema = new mongoose.Schema(
     {
@@ -29,11 +39,14 @@ const AppointmentSchema = new mongoose.Schema(
             type: Date,
             // required: true,
         },
+
+        /*
         status: {
             type: String,
             enum: ['Scheduled', 'Booked', 'Completed', 'Cancelled'],
             default: 'Scheduled',
         },
+        */
 
         schedule: [ScheduleSchema],
 

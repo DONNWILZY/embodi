@@ -99,8 +99,8 @@ const createAppointment = async (doctorId, appointments) => {
   }
 };
 
-///////// USER TO BOOK APPOINTMENT
-//const { populateDoctorFields, populatePatientFields } = require('../middleware/populateFields');
+///////// USER TO BOOK APPOINTMENT STARTS HERE
+
 // Middleware to populate doctor and patient details
 const populateDoctorFields = async (req, res, next) => {
   const { doctorId } = req.params;
@@ -745,6 +745,86 @@ const getBookedAppointmentsForDoctor = async (req, res) => {
   }
 };
 
+
+
+
+
+const bookAppointmentx = async (appointmentId, patientId) => {
+  try {
+    const appointment = await Appointment.findById(appointmentId).populate('doctor');
+
+    if (!appointment) {
+      return { success: false, message: `Appointment with ID ${appointmentId} not found.` };
+    }
+
+    const foundAppointment = appointment.schedule.find(schedule => schedule.status === 'Scheduled');
+
+    if (foundAppointment) {
+      // Generate a new bookingId
+      const bookingId = Math.random().toString(16).slice(2, 8);
+
+      // Update the found appointment
+      foundAppointment.status = 'Booked';
+      foundAppointment.bookingId = bookingId;
+      foundAppointment.patient = patientId;
+
+      // Save the updated appointment
+      await appointment.save();
+
+      // Get doctor and patient details
+      const doctor = appointment.doctor;
+      const patient = await User.findById(patientId);
+
+      // Send email notifications to doctor and patient
+      const doctorEmail = doctor.user.email;
+      const doctorName = `${doctor.user.firstName} ${doctor.user.lastName}`;
+
+      const patientEmail = patient.email;
+      const patientName = `${patient.firstName} ${patient.lastName}`;
+
+      // Send email to doctor
+      const doctorMailOptions = {
+        from: process.env.AUTH_EMAIL,
+        to: doctorEmail,
+        subject: 'Appointment Booked',
+        html: `
+          <h1>Appointment Booked</h1>
+          <p>Hi, Dr. ${doctorName},</p>
+          <p>A Patient ${patientName} has booked an appointment with you on ${appointment.date.toDateString()} from ${foundAppointment.startTime} to ${foundAppointment.endTime}.</p>
+        `,
+      };
+
+      // Send email to patient
+      const patientMailOptions = {
+        from: process.env.AUTH_EMAIL,
+        to: patientEmail,
+        subject: 'Appointment Booked',
+        html: `
+          <h1>Appointment Successfully Booked</h1>
+          <p>Hi, ${patientName},</p>
+          <p>You have successfully booked an appointment with Dr. ${doctorName} on ${appointment.date.toDateString()} from ${foundAppointment.startTime} to ${foundAppointment.endTime}.</p>
+        `,
+      };
+
+      // Send emails (you'll need to implement the email sending part)
+      sendEmail(doctorMailOptions); // Implement this function to send emails
+      sendEmail(patientMailOptions); // Implement this function to send emails
+
+      return { success: true, message: 'Appointment booked successfully.' };
+    } else {
+      return { success: false, message: 'No scheduled appointment found.' };
+    }
+  } catch (error) {
+    console.error('Error booking appointment:', error.message);
+    return { success: false, message: 'An error occurred while booking the appointment.' };
+  }
+};
+
+
+
+
+
+
 module.exports = {
   createAppointment,
   bookAppointment,
@@ -756,7 +836,8 @@ module.exports = {
   fetchBookedAppointmentsByDoctor,
   populateDoctorFields,
   populatePatientFields,
-  deleteAppointmentByID
+  deleteAppointmentByID,
+  bookAppointmentx,
 
   //deleteAppointment,
   //viewAppointments,

@@ -43,8 +43,7 @@ router.post("/create/:userId", async (req, res) => {
   }
 });
 
-router.post(
-  "/book/:doctorId/:patientId",
+router.post("/book/:doctorId/:patientId",
   appointmentController.bookAppointment
 );
 
@@ -87,5 +86,31 @@ router.get("/sortbydate/:doctorId");
 
 ////// getCompletedAppointmentsForDoctor GET ALL COMPLETED APPOINTMENT FOR EACH DOCTOR (ASIN ONE DOTOR SEEING ALL HIS APPOINTMENT)
 router.get("/viewCompleted/:doctorId");
+
+
+
+///// bookx
+
+const { bookAppointmentx } = require('../controllers/appointmentController'); 
+// Define the route for booking appointments //////bookx/:doctorId/:patientId/'
+router.post('/bookx', async (req, res) => {
+  const { appointmentId, patientId } = req.body;
+
+  try {
+    const result = await bookAppointment(appointmentId, patientId);
+    if (result.success) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error('Error in booking appointment:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+module.exports = router;
+
+
 
 module.exports = router;
